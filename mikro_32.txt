@@ -1,0 +1,115 @@
+﻿.data #dyrektywa oznaczająca początek miejsca na dane
+	.equ	zmienna,wartosc #dyrektywa tworzenia stałej
+	nazwa:
+		.typ	wartosc #wzór deklaracji dowolnej zmienej
+	arg1:
+		.word	wartosc #zmienna o rozmiarze 1 bajta
+	arg2:
+		.byte	wartosc #zmeinna o rozmiarze 2 bajtów
+	arg3:
+		.long	wartosc #zmienna o rozmiarze 4 bajtów
+	napis1:
+		.ascii	"napis\n" #zmienna tesktowa
+	napis2:
+		.string "napis\n" #zmienna tekstowa
+		
+	#Deklaracja tabeli
+	tabela:
+		.long	2,4,6,2,5,7,6,1 #właściwa deklaracja tabeli
+	lElementow: 
+		.long ( . - tabela ) >> 2 #obliczamy rozmiar tabeli. ważne aby zaraz bo deklaracji tabeli
+	
+	#ważne funkcje systemowe
+	.equ	create,0x08 #tworzenie pliku
+	.equ	open,0x05 #otwieranie pliku
+	.equ	close,0x06 #zamykanie pliku	
+	.equ	read,0x03 #czytanie danych z pliku
+	.equ	write,0x04 #zapis do pliku
+	.equ	exit,0x01 #wyjście z programu
+	.equ	kernel,0x80 #adres przerwania dla kernel
+		
+.text #dyrektywa oznaczająca początek rozkazów programu
+	.global _start #dyrektywa wskazująca od której etykiety rozpocząć
+	
+	NOP	 #odczekanie jednobajtowej operacji
+	
+	MOVL	r1,r2 #przenieś 4 bajty z r1 do r2
+	MOVW	r1,r2 #przenieś 2 bajty z r1 do r2
+	MOVB	r1,r2 #przenieś 1 bajt z r1 do r2
+	
+	ADD	r1,r2 #dodaj zawartość rejestru r1 do r2, wynik zapisz w r2
+	SUB	r1,r2 #dodaj zawartość rejestru r1 do r2, wynik zapisz w r2
+	ANDB	r1,r2 #koniuknkcja r1 i r2
+	ORB	r1,r2 #alternatywa r1 i r2
+	XORB	r1,r2 #dysjunkcjia r1 i r2
+	SHR	l1,r2 #przesuniecie bitowe rejestru r2 o l1 bitów
+	XCHG	r1,l1 #zamiana r1 i l1 miejscami (liczby 1 bajtowe)
+	XCHGL	r1,l1 #zamiana r1 i li miejscami (liczby 4 bajtowe)
+	DEC	r1 #dekrementacja r1 (liczba 1 bajtowa)
+	DECL	r1 #dekrementacja r1 (liczba 4 bajtowa)
+	INC	r1 #inkrementacja r1 (liczba 1 bajtowa)
+	INCL	r1 #inkrementacja r1 (liczba 4 bajtowa)
+	
+	CMPB	l1,l2 #porównanie l1 i l2 (liczby 1 bajtowe)
+	CMPW	l1,l2 #porównanie l1 i l2 (liczby 2 bajtowe)
+	CMPL	l1,l2 #porównanie l1 i l2 (liczby 4 bajtowe)
+	JB	etykieta #skok warunkowy, gdy l2 < l1 to przejdz do etykieta
+	JE	etykieta #skok warunkowy, gdy l1 == l2 to przejdz do etykieta
+	JA	etykieta #skok warunkowy, gdy l1 > l2 to przejdz do etykieta
+	JBE	etykieta #skok warunkowy, gdy l1 <= l2 to przejdz do etykieta
+	JBA	etykieta #skok warunkowy, gdy l1 >= l2 to przejdz do etykieta
+	JNZ	etykieta #skok warunkiwy, gdy wynik porównania różny od 0
+	JZ	etykieta #skok warunkowy, gdy wynik porównania to 0
+	JMP	etykieta #skok bezwarunkowy do etykieta
+	
+	POP r1 #pobranie argumentu ze stosu i zapis w r1
+	PUSH r1 #dodanie argumentu z r1 do stosu
+	
+	MOVL tabela(,r1,l2) r3 #r1 to rejestr z rozmiarem tabeli, l2 to ilość bajtów do odczytania, r3 to docelowy rejestr
+	
+	LOOP	etykieta #skok bezwarunkowy do etykieta, przed wykonaniem skoku wartosc rejestru %ecx jest zmniejszana o 1 i jeżeli wartość tego rejestru jest większa od 0 ty następuje przejście do etykieta 
+	
+	CALL	mojaFunkcja #wywołanie funkcji mojaFunkcja
+	
+	#definiowanie własnej function
+	.type mojaFunkcja, @function
+		mojaFunkcja:
+			...instrukce..
+			RET #dyrektywa oznaczajaca powrót do miejsca wywołania funkcji
+	
+	
+	LODSB #odczytuje jeden bajt do rejestru %al z bufora znajdującego się w rejestrze %esi
+	STOSB #umieszcza zawartość rejestru %al spowrotem w buforze
+	
+	#używanie funkcji systemowych
+	#do rejestru %eax zawsze zapisujemy adres funkcji, którą chcemy użycie
+	#do rejestru %ebx zapisujemy uchwyt do pliku. Tyczy się to również 3 podstawowych strumieni(stdin-0, stdout-1, stderr-2)
+	#rejestry %ecx i %edx są wykorzystywane równie w zależności od funkcji
+	#dla read/write do %ecx przekazuje się bufor do/z którego należy wczytać dane
+	#dla open/create do %ecx i %edx przekazuje się odpowiednie flagii
+	#dla read/write do %edx przekazuje się ilość bajtów do odczytania
+	#wartość zwracana przez funkcję znajduje się zawsze w rejestrze %eax
+	
+	# przykład użycia funkcji write
+	MOVL $0x04,%eax #(0x04 to adres funkcji write)
+	MOVL $1,%ebx # stdout
+	MOVL $starttxt,%ecx # adres tekstu
+	MOVL $startlen,%edx # ilość znaków
+	INT $0x80 # przerwanie
+	NOP # odczekanie jednobajtowej operacji nic nie robiącej
+	CMP %edx,%eax
+	JNZ error #jeżeli EAX<>EDX to cos poszlo nie tak
+
+	#Rodzaje rejestrów:
+	#%rax,%rbx,%rcx,%rdx,%rbp,%rsi,%rdi,%rsp - 8 bajtowe rejestry
+	#[rejestry 4 bajtowe]
+	#%eax - operacje arytmetyczne/dla sys adres funkcji
+	#%ebc - operacje arytmetyczne/dla sys uchwyt do pliku
+	#%ecx - licznik pętli LOOP/operacje arytmetyczne/rózne zastosowanie dla sys
+	#%edx - operacje arytmetycze/różne zastosowanie dla sys
+	#%esp - wskaźnik wirzchołka stosu
+	#%ebp - wskaznik do danych w stosie
+	#%esi - wskaźnik źródła (np. dla LODSB)
+	#%edi - wskaźnik przeznaczenia (??)
+	#%ax,%bx,%cx,%dx,%sp,%bp,%si,%di - 2 bajtowe rejesry, znajdują się wewnątrz 4 bajtowych rejestrów (doklejone do końca)
+	#%ah,%al,%bh,%bl,%ch,%cl,%dh,%dl - 1 bajtowe rejestry, znajują się wewnątrz 2 bajtowych rejestrów (doklejone do końca)
