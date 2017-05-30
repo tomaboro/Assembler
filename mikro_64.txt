@@ -47,20 +47,23 @@
 	SHR		l1,r2 #przesuniecie bitowe rejestru r2 o l1 bitów
 	XCHG	r1,l1 #zamiana r1 i l1 miejscami (liczby 1 bajtowe)
 	XCHGL	r1,l1 #zamiana r1 i li miejscami (liczby 4 bajtowe)
+	XCHGQ	r1,l1 #zamiana r1 i li miejscami (liczby 8 bajtowe)
 	DEC		r1 #dekrementacja r1 (liczba 1 bajtowa)
 	DECL	r1 #dekrementacja r1 (liczba 4 bajtowa)
+	DECQ	r1 #dekrementacja r1 (liczba 8 bajtowa)
 	INC		r1 #inkrementacja r1 (liczba 1 bajtowa)
 	INCL	r1 #inkrementacja r1 (liczba 4 bajtowa)
+	INCQ	r1 #inkrementacja r1 (liczba 8 bajtowa)
 	
 	CMPB	l1,l2 #porównanie l1 i l2 (liczby 1 bajtowe)
 	CMPW	l1,l2 #porównanie l1 i l2 (liczby 2 bajtowe)
 	CMPL	l1,l2 #porównanie l1 i l2 (liczby 4 bajtowe)
 	CMPQ	l1,l2 #porównanie l1 i l2 (liczby 8 bajtowe)
-	JB		etykieta #skok warunkowy, gdy l2 < l1 to przejdz do etykieta
+	JB		etykieta #skok warunkowy, gdy l1 > l2 to przejdz do etykieta
 	JE		etykieta #skok warunkowy, gdy l1 == l2 to przejdz do etykieta
-	JA		etykieta #skok warunkowy, gdy l1 > l2 to przejdz do etykieta
-	JBE		etykieta #skok warunkowy, gdy l1 <= l2 to przejdz do etykieta
-	JBA		etykieta #skok warunkowy, gdy l1 >= l2 to przejdz do etykieta
+	JA		etykieta #skok warunkowy, gdy l1 < l2 to przejdz do etykieta
+	JBE		etykieta #skok warunkowy, gdy l1 >= l2 to przejdz do etykieta
+	JBA		etykieta #skok warunkowy, gdy l1 <= l2 to przejdz do etykieta
 	JNZ		etykieta #skok warunkiwy, gdy wynik porównania różny od 0
 	JZ		etykieta #skok warunkowy, gdy wynik porównania to 0
 	JMP		etykieta #skok bezwarunkowy do etykieta
@@ -70,7 +73,7 @@
 	
 	MOVL tabela(,r1,l2) r3 #r1 to rejestr z rozmiarem tabeli, l2 to ilość bajtów do odczytania, r3 to docelowy rejestr
 	
-	LOOP	etykieta #skok bezwarunkowy do etykieta, przed wykonaniem skoku wartosc rejestru %ecx jest zmniejszana o 1 i jeżeli wartość tego rejestru jest większa od 0 ty następuje przejście do etykieta 
+	LOOP	etykieta #skok bezwarunkowy do etykieta, przed wykonaniem skoku wartosc rejestru %rcx jest zmniejszana o 1 i jeżeli wartość tego rejestru jest większa od 0 ty następuje przejście do etykieta 
 	
 	CALL	mojaFunkcja #wywołanie funkcji mojaFunkcja
 	
@@ -85,16 +88,16 @@
 	STOSB #umieszcza zawartość rejestru %al spowrotem w buforze
 	
 	#używanie funkcji systemowych
-	#do rejestru %eax zawsze zapisujemy adres funkcji, którą chcemy użycie
-	#do rejestru %ebx zapisujemy uchwyt do pliku. Tyczy się to również 3 podstawowych strumieni(stdin-0, stdout-1, stderr-2)
-	#rejestry %ecx i %edx są wykorzystywane równie w zależności od funkcji
-	#dla read/write do %ecx przekazuje się bufor do/z którego należy wczytać dane
-	#dla open/create do %ecx i %edx przekazuje się odpowiednie flagii
-	#dla read/write do %edx przekazuje się ilość bajtów do odczytania
-	#wartość zwracana przez funkcję znajduje się zawsze w rejestrze %eax
+	#do rejestru %rax zawsze zapisujemy adres funkcji, którą chcemy użycie
+	#do rejestru %rdi zapisujemy uchwyt do pliku. Tyczy się to również 3 podstawowych strumieni(stdin-0, stdout-1, stderr-2)
+	#rejestry %rsi i %rdx są wykorzystywane równie w zależności od funkcji
+	#dla read/write do %rsi przekazuje się bufor do/z którego należy wczytać dane
+	#dla open/create do %rsi i %rdx przekazuje się odpowiednie flagii
+	#dla read/write do %rdx przekazuje się ilość bajtów do odczytania
+	#wartość zwracana przez funkcję znajduje się zawsze w rejestrze %rax
 	
 	# przykład użycia funkcji write
-	MOVL $0x04,%eax #(0x04 to adres funkcji write)
+	MOVL 0x01,%eax #(0x04 to adres funkcji write)
 	MOVL $1,%ebx # stdout
 	MOVL $starttxt,%ecx # adres tekstu
 	MOVL $startlen,%edx # ilość znaków
@@ -103,6 +106,11 @@
 	CMP %edx,%eax
 	JNZ error #jeżeli EAX<>EDX to cos poszlo nie tak
 
+	#pisanie funkcji do wykorzystania w c
+	#pierwszych 6 argumentów funkcji jest przekazywanych do rejestrów(w tej kolejności) %rdi, %rsi, %rdx, %rcx, %r8, %r9.Kolejne argumenty znajdują się na stosie
+	#wartosc zwracana przez funkcję ostatecznie musi znaleźć się w rejestrze %rax
+	#piszac funkcje dla jezyka c musimy zadbac o zachowanie stosu. Oznacza to zapisanie rejestru %rbp i zastapinie go rejestrem %rsp, który będzie naszym stosem. Na koncu dzialania funkcji nalezy przywrocic stos (push %rbp	mov rsp,%rbp)(mov %rbp,%rsp		pop	%rbp)
+	
 	#Rodzaje rejestrów:
 	#%rax,%rbx,%rcx,%rdx,%rbp,%rsi,%rdi,%rsp - 8 bajtowe rejestry
 	#[rejestry 4 bajtowe]
