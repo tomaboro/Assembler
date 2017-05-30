@@ -1,7 +1,6 @@
 #miejsce na zmienne
 .data 
-napis:
-.string		"napis\n"
+
 #miejsce na kod
 .text
 .type generate_str, @function #deklaracja funkcji
