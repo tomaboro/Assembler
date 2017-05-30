@@ -18,7 +18,7 @@
 	movq	$0,%rax
 	zeruj:
 	cmpq	%rbx,%rsi 
-	jl	etykieta1 # max > b 
+	jle	etykieta1 # max > b 
 	movq	%rsi,%rbx # max < b -> max = b 
 	movq	$2,%rax
 	
@@ -28,7 +28,7 @@
 	movq	$0,%rax
 	zeruj1:
 	cmpq	%rbx,%rdx
-	jl	etykieta2 # max > c
+	jle	etykieta2 # max > c
 	movq	%rdx,%rbx # max < c -> max = c 
 	movq	$3,%rax
 	
@@ -38,7 +38,7 @@
 	movq	$0,%rax
 	zeruj2:	
 	cmpq	%rbx,%rcx
-	jl	etykieta3 # max > d
+	jle	etykieta3 # max > d
 	movq	%rcx,%rbx # max < d -> max = d
 	movq	$4,%rax
 	
