@@ -23,7 +23,7 @@
 	
 	movzbl	(%rdx),%ebx # przenosimy b[k] do ebx
 	cmpb	$0,%bl # sprawdzamy czy b[k] to koniec stringa
-	je		koniec_2 jesli tak to dopisujemy do buf reszte a
+	je		koniec_2 #jesli tak to dopisujemy do buf reszte a
 	movb	%bl,(%rdi) # jesli nie to przepisujemy b[k] do buf[j]
 	
 	incq	%rdx # zwiekszamy wskaznik po b (k++)
