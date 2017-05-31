@@ -1,11 +1,11 @@
-.data #dyrektywa oznaczająca początek miejsca na dane
+﻿.data #dyrektywa oznaczająca początek miejsca na dane
 	.equ	zmienna,wartosc #dyrektywa tworzenia stałej
 	nazwa:
 		.typ	wartosc #wzór deklaracji dowolnej zmienej
 	arg1:
-		.word	wartosc #zmienna o rozmiarze 1 bajta
+		.byte	wartosc #zmeinna o rozmiarze 1 bajta
 	arg2:
-		.byte	wartosc #zmeinna o rozmiarze 2 bajtów
+		.word	wartosc #zmienna o rozmiarze 2 bajtów
 	arg3:
 		.long	wartosc #zmienna o rozmiarze 4 bajtów
 	arg4:
@@ -32,26 +32,28 @@
 .text #dyrektywa oznaczająca początek rozkazów programu
 	.global _start #dyrektywa wskazująca od której etykiety rozpocząć
 	
-	NOP			  #odczekanie jednobajtowej operacji
+	NOP	#odczekanie jednobajtowej operacji
 	
 	MOVQ	r1,r2 #przenieś 8 bajtów z r1 do r2
 	MOVL	r1,r2 #przenieś 4 bajty z r1 do r2
 	MOVW	r1,r2 #przenieś 2 bajty z r1 do r2
 	MOVB	r1,r2 #przenieś 1 bajt z r1 do r2
 	
-	ADD		r1,r2 #dodaj zawartość rejestru r1 do r2, wynik zapisz w r2
-	SUB		r1,r2 #dodaj zawartość rejestru r1 do r2, wynik zapisz w r2
-	ANDB	r1,r2 #koniuknkcja r1 i r2
-	ORB		r1,r2 #alternatywa r1 i r2
-	XORB	r1,r2 #dysjunkcjia r1 i r2
-	SHR		l1,r2 #przesuniecie bitowe rejestru r2 o l1 bitów
+	ADD	r1,r2 #dodaj zawartość rejestru r1 do r2, wynik zapisz w r2
+	SUB	r1,r2 #dodaj zawartość rejestru r1 do r2, wynik zapisz w r2
+	DIV	r1 #podziel zawartość rejestru %rax przez r1. wynik zapisz w %rax, reszte w %rdx; czesto wymaga ustawienia odpowiednich flag np. cqto
+	MUL	r1 #poomnoz zawartość rejestru %rax przez r1. wynik zapisz w %rax
+	AND	r1,r2 #koniuknkcja r1 i r2
+	ORB	r1,r2 #alternatywa r1 i r2
+	XOR	r1,r2 #dysjunkcjia r1 i r2
+	SHR	l1,r2 #przesuniecie bitowe rejestru r2 o l1 bitów
 	XCHG	r1,l1 #zamiana r1 i l1 miejscami (liczby 1 bajtowe)
 	XCHGL	r1,l1 #zamiana r1 i li miejscami (liczby 4 bajtowe)
 	XCHGQ	r1,l1 #zamiana r1 i li miejscami (liczby 8 bajtowe)
-	DEC		r1 #dekrementacja r1 (liczba 1 bajtowa)
+	DEC	r1 #dekrementacja r1 (liczba 1 bajtowa)
 	DECL	r1 #dekrementacja r1 (liczba 4 bajtowa)
 	DECQ	r1 #dekrementacja r1 (liczba 8 bajtowa)
-	INC		r1 #inkrementacja r1 (liczba 1 bajtowa)
+	INC	r1 #inkrementacja r1 (liczba 1 bajtowa)
 	INCL	r1 #inkrementacja r1 (liczba 4 bajtowa)
 	INCQ	r1 #inkrementacja r1 (liczba 8 bajtowa)
 	
@@ -59,14 +61,16 @@
 	CMPW	l1,l2 #porównanie l1 i l2 (liczby 2 bajtowe)
 	CMPL	l1,l2 #porównanie l1 i l2 (liczby 4 bajtowe)
 	CMPQ	l1,l2 #porównanie l1 i l2 (liczby 8 bajtowe)
-	JB		etykieta #skok warunkowy, gdy l1 > l2 to przejdz do etykieta
-	JE		etykieta #skok warunkowy, gdy l1 == l2 to przejdz do etykieta
-	JA		etykieta #skok warunkowy, gdy l1 < l2 to przejdz do etykieta
-	JBE		etykieta #skok warunkowy, gdy l1 >= l2 to przejdz do etykieta
-	JBA		etykieta #skok warunkowy, gdy l1 <= l2 to przejdz do etykieta
-	JNZ		etykieta #skok warunkiwy, gdy wynik porównania różny od 0
-	JZ		etykieta #skok warunkowy, gdy wynik porównania to 0
-	JMP		etykieta #skok bezwarunkowy do etykieta
+	JB	etykieta #skok warunkowy, gdy l1 > l2 to przejdz do etykieta (nie działa dla ujemnych!)
+	JE	etykieta #skok warunkowy, gdy l1 == l2 to przejdz do etykieta
+	JA	etykieta #skok warunkowy, gdy l1 < l2 to przejdz do etykieta (nie działa dla ujemnych!)
+	JBE	etykieta #skok warunkowy, gdy l1 >= l2 to przejdz do etykieta (nie działa dla ujemnych!)
+	JBA	etykieta #skok warunkowy, gdy l1 <= l2 to przejdz do etykieta (nie działa dla ujemnych!)
+	JNZ	etykieta #skok warunkiwy, gdy wynik porównania różny od 0
+	JZ	etykieta #skok warunkowy, gdy wynik porównania to 0
+	JG	etykieta #skok warunkowy, gdy l1 < l2 to przejdz do etykieta (działa dla ujemnych!)
+	JL	etykieta #skok warunkowy, gdy l1 > l2 to przejdz do etykieta (działa dla ujemnych!)
+	JMP	etykieta #skok bezwarunkowy do etykieta
 	
 	POP r1 #pobranie argumentu ze stosu i zapis w r1
 	PUSH r1 #dodanie argumentu z r1 do stosu
@@ -108,19 +112,12 @@
 
 	#pisanie funkcji do wykorzystania w c
 	#pierwszych 6 argumentów funkcji jest przekazywanych do rejestrów(w tej kolejności) %rdi, %rsi, %rdx, %rcx, %r8, %r9.Kolejne argumenty znajdują się na stosie
+	#dobra praktyka jest zapisanie tych 6 argumentow na stosie, tak aby mozliwe bylo korzystanie z tych rejestrow podczas dzialania funkcji
 	#wartosc zwracana przez funkcję ostatecznie musi znaleźć się w rejestrze %rax
 	#piszac funkcje dla jezyka c musimy zadbac o zachowanie stosu. Oznacza to zapisanie rejestru %rbp i zastapinie go rejestrem %rsp, który będzie naszym stosem. Na koncu dzialania funkcji nalezy przywrocic stos (push %rbp	mov rsp,%rbp)(mov %rbp,%rsp		pop	%rbp)
 	
 	#Rodzaje rejestrów:
-	#%rax,%rbx,%rcx,%rdx,%rbp,%rsi,%rdi,%rsp - 8 bajtowe rejestry
-	#[rejestry 4 bajtowe]
-	#%eax - operacje arytmetyczne/dla sys adres funkcji
-	#%ebc - operacje arytmetyczne/dla sys uchwyt do pliku
-	#%ecx - licznik pętli LOOP/operacje arytmetyczne/rózne zastosowanie dla sys
-	#%edx - operacje arytmetycze/różne zastosowanie dla sys
-	#%esp - wskaźnik wirzchołka stosu
-	#%ebp - wskaznik do danych w stosie
-	#%esi - wskaźnik źródła (np. dla LODSB)
-	#%edi - wskaźnik przeznaczenia (??)
-	#%ax,%bx,%cx,%dx,%sp,%bp,%si,%di - 2 bajtowe rejesry, znajdują się wewnątrz 4 bajtowych rejestrów (doklejone do końca)
-	#%ah,%al,%bh,%bl,%ch,%cl,%dh,%dl - 1 bajtowe rejestry, znajują się wewnątrz 2 bajtowych rejestrów (doklejone do końca)
+	#%rax,%rbx,%rcx,%rdx,%rbp,%rsi,%rdi,%rsp, %r8,%r9,%r10,%r11,%r12,%r13,%r14,%r15 - 8 bajtowe rejestry
+	#%eax,%ebx,%ecx,%edx,%esp,%esp,%ebp,%esi,%edi - 4 bajtowe rejestry, znajduja sie wewnatrz rjestrow 8 bajtowych
+	#%ax,%bx,%cx,%dx,%sp,%bp,%si,%di - 2 bajtowe rejesry, znajdują się wewnątrz 4 bajtowych rejestrów (doklejone do prawej)
+	#%ah,%al,%bh,%bl,%ch,%cl,%dh,%dl - 1 bajtowe rejestry, znajują się wewnątrz 2 bajtowych rejestrów (Xh - do lewej, Xl - do prawej)
