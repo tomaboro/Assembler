@@ -1,26 +1,56 @@
 #miejsce na zmienne
-.data 
+.data
 
 #miejsce na kod
 .text
 .type fun, @function #deklaracja funkcji
 .global fun #deklarujemy nasza funkcje jako globalna(punkt startowy programu)
 
-	fun:
-	push	%rbp #zapisujemy stos
-	mov		%rsp,%rbp 
-	
-	movq	%rdi,%rax # przepisujemy wskaznik do stringa do rejestru ktory jest 'zwracany'
-	
-	movb	(%rsi),(%rdi) 
-	incq	%rdi # przesuwamy wskaznik do zarezerwowanej przestrzeni o jeden znak
-	incq	%rsi
-	movb	(%rdx),(%rdi)
-	incq	%rdi # przesuwamy wskaznik do zarezerwowanej przestrzeni o jeden znak
-	incq	%rsi
-	
-	mov	%rbp,%rsp 
-	pop	%rbp # przywracamy pierwotny stan stosu
-	ret	#wyjscie z funkcji
+        fun:
+        push    %rbp #zapisujemy stos
+        mov             %rsp,%rbp
 
-	
+        movq    %rdi,%rax
+
+        petla:
+        movzbl  (%rsi),%ebx
+        cmpb    $0,%bl
+        je              koniec_1
+        movb    %bl,(%rdi)
+
+        incq    %rsi
+        incq    %rdi
+
+        movzbl  (%rdx),%ebx
+        cmpb    $0,%bl
+        je              koniec_2
+        movb    %bl,(%rdi)
+
+        incq    %rdx
+        incq    %rdi
+        jmp             petla
+
+        koniec_1:
+        movzbl  (%rdx),%ebx
+        cmpb    $0,%bl
+        je              koniec
+        movb    %bl,(%rdi)
+
+        incq    %rdx
+        incq    %rdi
+        jmp             koniec_1
+
+        koniec_2:
+        movzbl  (%rsi),%ebx
+        cmpb    $0,%bl
+        je              koniec
+        movb    %bl,(%rdi)
+
+        incq    %rsi
+        incq    %rdi
+        jmp             koniec_2
+
+        koniec:
+        mov     %rbp,%rsp
+        pop     %rbp # przywracamy pierwotny stan stosu
+        ret     #wyjscie z funkcji
