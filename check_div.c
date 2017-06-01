@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned long chec_div(int a, int b, int c);
+unsigned long check_div(int a, int b, int c);
 
 int main( void )
 {
