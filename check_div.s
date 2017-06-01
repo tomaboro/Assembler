@@ -1,6 +1,6 @@
+#TOMASZ BOROWICZ
 .data 
-arg1:
-	.quad	0
+
 #miejsce na kod
 .text
 .type check_div, @function #deklaracja funkcji
@@ -50,7 +50,7 @@ arg1:
 	c1_reszta_0:
 	cmpq	$1,%r9 #sprawdzamy szczegoony przypadek
 	je		skok
-	movq	%r9,%r12 #zapisujemy wartosc r9, bedziemy jej uzywac do uteracji petli
+	movq	%r9,%r12 #zapisujemy wartosc r9 do r1 bo bedziemy jej uzywac do iteracji petli
 	inner_petla:
 	decq	%r9 
 	shlq	$1,%r10 #przesuwamy bitowo 0 1 w lewo
